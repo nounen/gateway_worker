@@ -12,17 +12,14 @@
  * @license http://www.opensource.org/licenses/mit-license.php MIT License
  */
 use \Workerman\Worker;
-use \Workerman\WebServer;
-use \GatewayWorker\Gateway;
 use \GatewayWorker\BusinessWorker;
-use \Workerman\Autoloader;
 
 // bussinessWorker 进程
 $worker = new BusinessWorker();
 // worker名称
 $worker->name = 'YourAppBusinessWorker';
 // bussinessWorker进程数量
-$worker->count = 4;
+$worker->count = 1;
 // 服务注册地址
 $worker->registerAddress = '127.0.0.1:1238';
 
