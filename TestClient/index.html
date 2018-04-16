@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>WebSocket Test Client</title>
-
-
+    <link rel="shortcut icon" href="./favicon.png">
 </head>
 <body>
 <script>
@@ -13,12 +12,12 @@
     }
 
     class socketHelper {
-        constructor(from, to, event, data) {
+        constructor(event = '', data = '', from = '', to = '') {
             this.sendData = {}
-            this.sendData.from = from
-            this.sendData.to = to
             this.sendData.event = event
             this.sendData.data = data
+            this.sendData.from = from
+            this.sendData.to = to
         }
 
         getSendData() {
@@ -29,10 +28,7 @@
     // https://developer.mozilla.org/zh-CN/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
     var ws = new WebSocket("ws://127.0.0.1:8282")
 
-    // 向服务器发送数据
-    // ws.send("Here's some text that the server is urgently awaiting!");
-
-    // webSocket链接时触发, 只发送一次
+    // webSocket 连接时触发, 只发送一次
     ws.onopen = function (event) {
         log('onopen:')
 
@@ -40,8 +36,6 @@
 
         // 构造发送的数据, socket 一般只做转发
         sh = new socketHelper(
-            "live1",
-            "class1",
             "onopen",
             {
                 age: 29,
@@ -54,8 +48,6 @@
 
         // 特殊事件名约定, socket 服务器把当前客户加入指定 group
         sh = new socketHelper(
-            "live1",
-            "",
             "join_group",
             [
                 "live1",
@@ -66,8 +58,13 @@
         ws.send(sh.getSendData());
     }
 
+    // 收到 socket 数据处理
     ws.onmessage = function (event) {
+        var serverData = JSON.parse(event.data)
+
         log('onmessage:')
+
+        log(serverData)
     }
 
     ws.onclose = function (event) {
@@ -78,67 +75,6 @@
         log('onerror:')
     }
 
-    /*
-        // 使用 JSON 发送对象
-        // 服务器向所有用户发送文本
-        function sendText() {
-            // 构造一个 msg 对象， 包含了服务器处理所需的数据
-            var msg = {
-                type: "message",
-                text: document.getElementById("text").value,
-                id:   clientID,
-                date: Date.now()
-            };
-
-            // 把 msg 对象作为JSON格式字符串发送
-            ws.send(JSON.stringify(msg));
-
-            // 清空文本输入元素，为接收下一条消息做好准备。
-            document.getElementById("text").value = "";
-        }
-
-        // 接收服务器发送的消息
-        ws.onmessage = function (event) {
-            console.log(event.data);
-        }
-
-        // 接受与解析 JSON 对象
-        ws.onmessage = function(event) {
-            var f = document.getElementById("chatbox").contentDocument;
-            var text = "";
-            var msg = JSON.parse(event.data);
-            var time = new Date(msg.date);
-            var timeStr = time.toLocaleTimeString();
-
-            switch(msg.type) {
-                case "id":
-                    clientID = msg.id;
-                    setUsername();
-                    break;
-                case "username":
-                    text = "<b>User <em>" + msg.name + "</em> signed in at " + timeStr + "</b><br>";
-                    break;
-                case "message":
-                    text = "(" + timeStr + ") <b>" + msg.name + "</b>: " + msg.text + "<br>";
-                    break;
-                case "rejectusername":
-                    text = "<b>Your username has been set to <em>" + msg.name + "</em> because the name you chose is in use.</b><br>"
-                    break;
-                case "userlist":
-                    var ul = "";
-                    for (i=0; i < msg.users.length; i++) {
-                        ul += msg.users[i] + "<br>";
-                    }
-                    document.getElementById("userlistbox").innerHTML = ul;
-                    break;
-            }
-
-            if (text.length) {
-                f.write(text);
-                document.getElementById("chatbox").contentWindow.scrollByPages(1);
-            }
-        };
-    */
     // 关闭链接
     // ws.close();
 </script>
