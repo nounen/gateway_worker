@@ -1,5 +1,19 @@
+## 案例说明
+* socket 服务器开启: `php start.php start`
+
+* 客户端进入 TestClient 目录: 执行 `php -S localhost:8000` 即可访问
+
+* MVC 主动向客户端发送 socket: `php SocketFromMVC.php`
+
+* 范例内容:
+    * socket 特殊接口: 客户端给自己打标签 (joinGroup)
+    * socket 转发接口: 在业务规划好的情况下提供转发接口让 客户端 把数据原样转发给 另一个客户端.
+    * MVC 框架做 客户端 示例
+
+
 ## GatewayWorker2.x 3.x 手册
 * http://doc2.workerman.net/326102
+
 
 ## 基于Gateway、Worker进程模型
 * GatewayWorker 使用经典的 Gateway 和 Worker 进程模型。
@@ -10,8 +24,10 @@
 
 * **Gateway服务** 和 **Worker服务** 可以分开部署在不同的服务器上，实现分布式集群。
 
+
 ## 工作原理
 * http://doc2.workerman.net/326104
+
 
 ### 关于 Register 进程
 * Gateway 进程相当于 Workerman 的 Master
@@ -23,6 +39,7 @@
 * **Register 服务** 收到 Gateway 的注册后，把所有 Gateway 的通讯地址保存在内存中
 
 * **Register 服务** 收到 BusinessWorker 的注册后，把内存中所有的 Gateway 的通讯地址发给BusinessWorker
+
 
 ### BusinessWorker 进程
 * BusinessWorker 的业务逻辑入口全部在 Events.php 中，包括:
