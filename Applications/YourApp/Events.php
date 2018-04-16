@@ -15,7 +15,7 @@
 /**
  * 用于检测业务代码死循环或者长时间阻塞等问题
  * 如果发现业务卡死，可以将下面declare打开（去掉//注释），并执行php start.php reload
- * 然后观察一段时间workerman.log看是否有process_timeout异常
+ * 然后观察一段时间 workerman.log 看是否有 process_timeout 异常
  */
 //declare(ticks=1);
 
@@ -41,7 +41,8 @@ class Events
      * @param string $to
      * @return string
      */
-    public static function getSendData($event = '', $data = '', $from = '', $to = '') {
+    public static function getSendData($event = '', $data = '', $from = '', $to = '')
+    {
         $sendData = [
             'event' => $event,
             'data'  => $data,
@@ -64,22 +65,19 @@ class Events
      * @param int $clientId 连接id
      * @throws Exception
      */
-    public static function onConnect($clientId) {
+    public static function onConnect($clientId)
+    {
         echo "onConnect: \n\r";
-
-        // 向当前client_id发送数据
-        // Gateway::sendToClient($clientId, self::getSendData('on_connect', "Hello $clientId\n"));
-
-        // 向所有人发送
-        // Gateway::sendToAll(self::getSendData('on_connect', "$clientId login"));
     }
-    
-   /**
-    * 当客户端发来消息时触发
-    * @param int $clientId 连接id
-    * @param mixed $message 具体消息
-    */
-   public static function onMessage($clientId, $message) {
+
+    /**
+     * 当客户端发来消息时触发
+     * @param $clientId
+     * @param $message
+     * @throws Exception
+     */
+   public static function onMessage($clientId, $message)
+   {
        echo "onMessage: \n\r";
 
        // TODO: 接收数据时需要针对 $message 不是 json 字符串的情况做处理, 不能报错
@@ -91,10 +89,30 @@ class Events
                self::clientJoinGroups($clientId, $clientData['data']);
                Gateway::sendToClient($clientId, self::getSendData('join_group_response', '加入分组成功'));
                break;
+           // 原样转发数据
+           default:
+               self::redirectMessage($clientId, $clientData);
        }
+   }
 
-        // 向所有人发送
-//        Gateway::sendToAll("$clientId said = $message");
+    /**
+     * 原样转发客户端数据: 数据结构固定
+     *
+     * @param $clientId
+     * @param $clientData
+     * @throws Exception
+     */
+   public static function redirectMessage($clientId, $clientData)
+   {
+       Gateway::sendToGroup(
+           $clientData['to'],
+           self::getSendData(
+               $clientData['event'],
+               $clientData['data'],
+               $clientData['from'],
+               $clientData['to']
+           )
+       );
    }
 
     /**
@@ -103,7 +121,8 @@ class Events
      * @param $clientId
      * @param $groups
      */
-   public static function clientJoinGroups($clientId, $groups) {
+   public static function clientJoinGroups($clientId, $groups)
+   {
        foreach ($groups as $group) {
            Gateway::joinGroup($clientId, $group);
        }
@@ -114,11 +133,9 @@ class Events
     * @param int $clientId 连接id
     * @throws Exception
     */
-   public static function onClose($clientId) {
+   public static function onClose($clientId)
+   {
        echo "onClose: \n\r";
-
-       // 向所有人发送
-       // Gateway::sendToAll(self::getSendData('on_close', "$clientId logout"));
    }
 
     public static function onWorkerStop($businessWorker)

@@ -7,10 +7,9 @@
 </head>
 <body>
 <script>
-    function log(value) {
-        console.log(value)
-    }
+    // 浏览器打开例如: http://localhost:8000/?curriculum_id=1&teacher_id=1&student_id=1
 
+    // 发送数据封装
     class socketHelper {
         constructor(event = '', data = '', from = '', to = '') {
             this.sendData = {}
@@ -25,6 +24,28 @@
         }
     }
 
+    /**
+     * 初始化信息: 课程, 学管师, 学生
+     * @returns {{curriculum_id: *, teacher_id: *, student_id: *}}
+     */
+    function getInitData() {
+        var curriculumId = getQueryString('curriculum_id')
+        var teacherId    = getQueryString('teacher_id')
+        var studentId    = getQueryString('student_id')
+
+        if (!curriculumId  || !teacherId  || !studentId ) {
+            alert('初始化信息不足!')
+        }
+
+        var initData = {
+            curriculum_id: curriculumId,
+            teacher_id: teacherId,
+            student_id: studentId,
+        }
+
+        return initData
+    }
+
     // https://developer.mozilla.org/zh-CN/docs/Web/API/WebSockets_API/Writing_WebSocket_client_applications
     var ws = new WebSocket("ws://127.0.0.1:8282")
 
@@ -32,30 +53,43 @@
     ws.onopen = function (event) {
         log('onopen:')
 
-        // log(event);
+        var initData = getInitData();
 
-        // 构造发送的数据, socket 一般只做转发
-        sh = new socketHelper(
-            "onopen",
-            {
-                age: 29,
-                name: "linxl",
-                student_ids: [1, 2, 3]
-            }
-        )
-
-        ws.send(sh.getSendData());
+        // // 构造发送的数据, socket 一般只做转发
+        // sh = new socketHelper(
+        //     "onopen",
+        //     {
+        //         age: 29,
+        //         name: "linxl",
+        //         student_ids: [1, 2, 3]
+        //     }
+        // )
+        //
+        // ws.send(sh.getSendData());
 
         // 特殊事件名约定, socket 服务器把当前客户加入指定 group
         sh = new socketHelper(
-            "join_group",
+            'join_group',
             [
-                "live1",
-                "teacher1"
+                `curriculum_${initData.curriculum_id}`,
+                `teacher_${initData.teacher_id}`,
+                `student_${initData.student_id}`,
             ]
         );
 
         ws.send(sh.getSendData());
+
+        setTimeout(function () {
+            // 客户端数据数据转发到指定客户端 (group)
+            sh = new socketHelper(
+                'redirect_onopen',
+                '这是一条聊天文字',
+                '',
+                `curriculum_${initData.curriculum_id}`
+            );
+
+            ws.send(sh.getSendData());
+        }, 3000)
     }
 
     // 收到 socket 数据处理
@@ -77,6 +111,24 @@
 
     // 关闭链接
     // ws.close();
+
+    // 打印日志
+    function log(value) {
+        console.log(value);
+    }
+
+    // 获取 url 参数
+    function getQueryString(query_key, default_value = null) {
+        var reg = new RegExp('(^|&)' + query_key + '=([^&]*)(&|$)', 'i')
+
+        var r = window.location.search.substr(1).match(reg)
+
+        if (r != null) {
+            return unescape(r[2])
+        }
+
+        return default_value
+    }
 </script>
 </body>
 </html>
