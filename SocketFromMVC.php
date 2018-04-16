@@ -23,7 +23,7 @@ function getSendData($event = '', $data = '', $from = '', $to = '')
     return json_encode($sendData);
 }
 
-//
+// 发送 socket
 $message = '这是一条来自 MVC 推送的 socket 消息!';
 
 $targetGroup = 'teacher_1';
